@@ -1,8 +1,9 @@
 (ns load-balancer.core
   (:require [org.httpkit.server :refer [run-server]]
-            [load-balancer.routes :refer [be-app-1 be-app-2 lb-app]]))
+            [load-balancer.routes :refer [be-apps lb-app]]))
 
 (defn -main []
   (run-server (lb-app) {:port 3000})
-  (run-server (be-app-1) {:port 8081})
-  (run-server (be-app-2) {:port 8082}))
+  (map-indexed (fn [i server]
+                 (run-server (server) {:port (+ 8080 i)}))
+               be-apps))

@@ -12,23 +12,25 @@
                         (println "User-Agent:" (get headers "user-agent"))
                         (println "Accept:" (get headers "accept"))))
 
-(defn get-route [port]
+(defn get-route [server-number]
   (GET "/" request (do (log-request request)
-                       {:success 200 :body (join " " ["Hello from server" port])})))
+                       {:success 200 :body (join " " ["Hello from server" server-number])})))
 
-(defn be-app-1 []
-  (-> (get-route 1) wrap-reload wrap-params))
+(defn get-app [server-number] 
+  (fn [] (-> (get-route server-number) wrap-reload wrap-params)))
 
-(defn be-app-2 []
-  (-> (get-route 2) wrap-reload wrap-params))
+(defn get-apps [amount]
+  (map get-app (range amount)))
 
-(defn get-server []
-  ((rand-nth [be-app-1 be-app-2])))
+(def be-apps (get-apps 10))
+
+(defn get-be-app []
+  ((rand-nth be-apps)))
 
 (defroutes
   lb-app-routes
   (GET "/" request (do (log-request request)
-                       ((get-server) request))))
+                       ((get-be-app) request))))
 
 (defn lb-app []
   (-> lb-app-routes wrap-reload wrap-params))
