@@ -7,8 +7,16 @@
 
 (defroutes
   app-routes
-  (GET "/" [] {:status 200})
-  (route/not-found "Not Found"))
+  (GET "/" request ((fn []
+                      (let [headers (:headers request)]
+                        (println "Handled request from" (get headers "host"))
+                        (println (:request-method request) "/" (:scheme request))
+                        (println "Host:" (:server-name request))
+                        (println "User-Agent:" (get headers "user-agent"))
+                        (println "Accept:" (get headers "accept"))
+
+                        {:success 200}))))
+    (route/not-found "Not Found"))
 
 (defn app []
   (-> app-routes wrap-reload wrap-params wrap-session))
