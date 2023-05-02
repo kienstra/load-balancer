@@ -5,17 +5,26 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.session :refer [wrap-session]]))
 
-(defroutes
-  app-routes
-  (GET "/" request (let [headers (:headers request)]
+(defn log-request [request]
+  (let [headers (:headers request)]
                         (println "Handled request from" (get headers "host"))
                         (println (:request-method request) "/" (:scheme request))
                         (println "Host:" (:server-name request))
                         (println "User-Agent:" (get headers "user-agent"))
-                        (println "Accept:" (get headers "accept"))
+                        (println "Accept:" (get headers "accept"))))
 
-                        {:success 200}))
-    (route/not-found "Not Found"))
+(defroutes
+  be-app-routes
+  (GET "/" request (do (log-request request)
+                        {:success 200 :body "Replied with a hello message"})))
 
-(defn app []
-  (-> app-routes wrap-reload wrap-params wrap-session))
+(defroutes
+  lb-app-routes
+  (GET "/" request (do (log-request request)
+                    {:success 200 :body "Hello from back-end server"})))
+
+(defn be-app []
+  (-> be-app-routes wrap-reload wrap-params wrap-session))
+
+(defn lb-app []
+  (-> lb-app-routes wrap-reload wrap-params wrap-session))
