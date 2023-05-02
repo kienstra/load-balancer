@@ -1,6 +1,6 @@
 (ns load-balancer.routes
-  (:require [compojure.core :refer [defroutes GET]]
-            [compojure.route :as route]
+  (:require [clojure.string :refer [join]]
+            [compojure.core :refer [defroutes GET]]
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.session :refer [wrap-session]]))
@@ -14,17 +14,28 @@
                         (println "Accept:" (get headers "accept"))))
 
 (defroutes
-  be-app-routes
-  (GET "/" request (do (log-request request)
-                   {:success 200 :body "Replied with a hello message"})))
+    be-app-routes-1
+    (GET "/" request (do (log-request request)
+                         {:success 200 :body (join " " ["Hello from server" 1])})))
 
-(defn be-app []
-  (-> be-app-routes wrap-reload wrap-params wrap-session))
+(defn be-app-1 []
+  (-> be-app-routes-1 wrap-reload wrap-params wrap-session))
+
+(defroutes
+  be-app-routes-2
+  (GET "/" request (do (log-request request)
+                       {:success 200 :body (join " " ["Hello from server" 2])})))
+
+(defn be-app-2 []
+  (-> be-app-routes-2 wrap-reload wrap-params wrap-session))
+
+(defn get-server []
+  ((rand-nth [be-app-1 be-app-2])))
 
 (defroutes
   lb-app-routes
   (GET "/" request (do (log-request request)
-                       ((be-app) request))))
+                       ((get-server) request))))
 
 (defn lb-app []
   (-> lb-app-routes wrap-reload wrap-params wrap-session))
