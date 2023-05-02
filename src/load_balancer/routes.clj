@@ -2,8 +2,7 @@
   (:require [clojure.string :refer [join]]
             [compojure.core :refer [defroutes GET]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [ring.middleware.params :refer [wrap-params]]
-            [ring.middleware.session :refer [wrap-session]]))
+            [ring.middleware.params :refer [wrap-params]]))
 
 (defn log-request [request]
   (let [headers (:headers request)]
@@ -19,7 +18,7 @@
                          {:success 200 :body (join " " ["Hello from server" 1])})))
 
 (defn be-app-1 []
-  (-> be-app-routes-1 wrap-reload wrap-params wrap-session))
+  (-> be-app-routes-1 wrap-reload wrap-params))
 
 (defroutes
   be-app-routes-2
@@ -27,7 +26,7 @@
                        {:success 200 :body (join " " ["Hello from server" 2])})))
 
 (defn be-app-2 []
-  (-> be-app-routes-2 wrap-reload wrap-params wrap-session))
+  (-> be-app-routes-2 wrap-reload wrap-params))
 
 (defn get-server []
   ((rand-nth [be-app-1 be-app-2])))
@@ -38,4 +37,4 @@
                        ((get-server) request))))
 
 (defn lb-app []
-  (-> lb-app-routes wrap-reload wrap-params wrap-session))
+  (-> lb-app-routes wrap-reload wrap-params))
