@@ -16,12 +16,12 @@
 (defroutes
   be-app-routes
   (GET "/" request (do (log-request request)
-                   {:success 200 :body "Hello from back-end server"})))
+                   {:success 200 :body "Replied with a hello message"})))
 
 (defroutes
   lb-app-routes
   (GET "/" request (do (log-request request)
-                   {:success 200 :body "Replied with a hello message"})))
+                   {:success 200 :body "Hello from back-end server"})))
 
 (defn be-app []
   (-> be-app-routes wrap-reload wrap-params wrap-session))
