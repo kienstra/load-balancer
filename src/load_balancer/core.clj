@@ -4,4 +4,5 @@
 
 (defn -main []
   (run-server (lb-app) {:port 3000})
-  (run-server (be-app) {:port 4000}))
+  (run-server (be-app) {:port 8081})
+  (run-server (be-app) {:port 8082}))
