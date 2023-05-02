@@ -18,13 +18,13 @@
   (GET "/" request (do (log-request request)
                    {:success 200 :body "Replied with a hello message"})))
 
+(defn be-app []
+  (-> be-app-routes wrap-reload wrap-params wrap-session))
+
 (defroutes
   lb-app-routes
   (GET "/" request (do (log-request request)
-                   {:success 200 :body "Hello from back-end server"})))
-
-(defn be-app []
-  (-> be-app-routes wrap-reload wrap-params wrap-session))
+                       ((be-app) request))))
 
 (defn lb-app []
   (-> lb-app-routes wrap-reload wrap-params wrap-session))
