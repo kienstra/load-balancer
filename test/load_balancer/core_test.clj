@@ -1,7 +1,9 @@
 (ns load-balancer.core-test
-  (:require [clojure.test :refer :all]
-            [load-balancer.core :refer :all]))
+  (:require [clojure.test :refer [deftest is testing]]
+            [ring.mock.request :as mock]
+            [load-balancer.routes :refer [app]]))
 
-(deftest a-test
-  (testing "trivial test"
-    (is (= 1 1))))
+(deftest test-app
+  (testing "load balancing server"
+    (let [response ((app) (mock/request :get "/example"))]
+      (is (= (:status response) 200)))))

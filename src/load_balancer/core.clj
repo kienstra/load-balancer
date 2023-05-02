@@ -1,7 +1,6 @@
 (ns load-balancer.core
-  (:gen-class))
+  (:require [org.httpkit.server :refer [run-server]]
+            [load-balancer.routes :refer [app]]))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
+(defn -main []
+  (run-server (app) {:port 3000}))
