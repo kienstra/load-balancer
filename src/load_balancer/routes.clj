@@ -22,10 +22,22 @@
 (defn get-apps [amount]
   (map get-app (range amount)))
 
-(def be-apps (get-apps 10))
+(def amount-of-apps 10)
+(def be-apps (get-apps amount-of-apps))
+
+(def app-sentinel (ref 0))
+(defn increment-sentinel []
+  (dosync
+   (alter app-sentinel (fn [n]
+                         (if
+                          (= (count be-apps) (inc n))
+                           0
+                           (inc n))))))
 
 (defn get-be-app []
-  ((rand-nth be-apps)))
+  (let [app (nth be-apps (deref app-sentinel))]
+    (increment-sentinel)
+    (app)))
 
 (defroutes
   lb-app-routes
