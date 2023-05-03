@@ -27,7 +27,7 @@
                               (let [status (if (healthy? app) :healthy :unhealthy)]
                                 (into acc {status (into (get acc status []) [app])})))
                             {}
-                            (into (:healthy previous) (:unhealthy previous)))))))
+                            (into (get previous :healthy []) (get previous :unhealthy [])))))))
 
 (def app-sentinel (ref 0))
 (defn increment-sentinel [apps]
@@ -42,5 +42,3 @@
   (let [app (nth (:healthy (deref be-apps)) (deref app-sentinel))]
     (increment-sentinel (:healthy (deref be-apps)))
     (app)))
-
-; {:active [] :inactive []}
