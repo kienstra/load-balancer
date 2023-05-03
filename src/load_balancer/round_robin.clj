@@ -5,7 +5,6 @@
             [ring.middleware.params :refer [wrap-params]]
             [load-balancer.log :refer [log-request]]))
 
-
 (defn get-route [server-number]
   (GET "/" request (do (log-request request)
                        {:success 200 :body (join " " ["Hello from server" server-number])})))
@@ -19,7 +18,7 @@
 (def be-apps (ref {:healthy (get-apps 10)}))
 
 (defn health-check []
-  (dosync 
+  (dosync
    (alter be-apps (fn [previous]
                     (map [])))))
 
@@ -31,7 +30,7 @@
   (dosync
    (alter app-sentinel (fn [previous]
                          (if
-                           (= (count apps) (inc previous))
+                          (= (count apps) (inc previous))
                            0
                            (inc previous))))))
 
