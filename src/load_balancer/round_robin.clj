@@ -17,13 +17,17 @@
 
 (def be-apps (ref {:healthy (get-apps 10)}))
 
+(defn healthy? [server]
+  true)
+
 (defn health-check []
   (dosync
    (alter be-apps (fn [previous]
-                    (map [])))))
-
-(defn is-healthy [server]
-  true)
+                    (reduce (fn [acc app]
+                              (let [status (if (healthy? app) :healthy :unhealthy)]
+                                (into acc {status (into (get acc status []) [app])})))
+                            {}
+                            (into (:healthy previous) (:unhealthy previous)))))))
 
 (def app-sentinel (ref 0))
 (defn increment-sentinel [apps]
