@@ -6,17 +6,17 @@
 
 (defn log-request [request]
   (let [headers (:headers request)]
-                        (println "Handled request from" (get headers "host"))
-                        (println (:request-method request) "/" (:scheme request))
-                        (println "Host:" (:server-name request))
-                        (println "User-Agent:" (get headers "user-agent"))
-                        (println "Accept:" (get headers "accept"))))
+    (println "Handled request from" (get headers "host"))
+    (println (:request-method request) "/" (:scheme request))
+    (println "Host:" (:server-name request))
+    (println "User-Agent:" (get headers "user-agent"))
+    (println "Accept:" (get headers "accept"))))
 
 (defn get-route [server-number]
   (GET "/" request (do (log-request request)
                        {:success 200 :body (join " " ["Hello from server" server-number])})))
 
-(defn get-app [server-number] 
+(defn get-app [server-number]
   (fn [] (-> (get-route server-number) wrap-reload wrap-params)))
 
 (defn get-apps [amount]

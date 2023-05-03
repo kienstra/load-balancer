@@ -7,7 +7,8 @@
                  [compojure "1.7.0"]
                  [http-kit "2.6.0"]
                  [ring "1.10.0" :exclusions [ring/ring-core]]]
-  :plugins [[lein-ring "0.12.6"]]
+  :plugins [[lein-ring "0.12.6"]
+            [lein-cljfmt "0.9.2"]]
   :ring {:handler load-balancer.handler/app}
   :main ^:skip-aot load-balancer.core
   :target-path "target/%s"
