@@ -23,8 +23,7 @@
 (defn get-apps [amount]
   (map get-app (range amount)))
 
-(def amount-of-apps 10)
-(def be-apps (get-apps amount-of-apps))
+(def be-apps (get-apps 10))
 
 (defroutes
   lb-app-routes
