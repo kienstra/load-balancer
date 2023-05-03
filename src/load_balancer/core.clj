@@ -1,6 +1,7 @@
 (ns load-balancer.core
   (:require [org.httpkit.server :refer [run-server]]
-            [load-balancer.routes :refer [be-apps lb-app]]))
+            [load-balancer.round-robin :refer [be-apps]]
+            [load-balancer.routes :refer [lb-app]]))
 
 (defn -main []
   (run-server (lb-app) {:port 3000})
