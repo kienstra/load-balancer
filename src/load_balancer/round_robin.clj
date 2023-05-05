@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [GET]]
             [clojure.string :refer [join]]
             [ring.middleware.reload :refer [wrap-reload]]
+            [ring.mock.request :as mock]
             [ring.middleware.params :refer [wrap-params]]
             [load-balancer.log :refer [log-request]]))
 
@@ -17,8 +18,9 @@
 
 (def be-apps (ref {:healthy (get-apps 10)}))
 
-(defn healthy? [server]
-  true)
+(defn healthy? [app]
+  (let [status (:status ((app) (mock/request :get "/")))]
+    (and (>= status 200) (< status 300))))
 
 (defn health-check []
   (dosync
