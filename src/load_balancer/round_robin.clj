@@ -1,10 +1,11 @@
 (ns load-balancer.round-robin
-  (:require [compojure.core :refer [GET]]
+  (:require [clojure.core.async :refer [<! go-loop timeout]]
             [clojure.string :refer [join]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.mock.request :as mock]
+            [compojure.core :refer [GET]]
+            [load-balancer.log :refer [log-request]]
             [ring.middleware.params :refer [wrap-params]]
-            [load-balancer.log :refer [log-request]]))
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.mock.request :as mock]))
 
 (defn get-route [server-number]
   (GET "/" request (do (log-request request)
@@ -30,6 +31,13 @@
                                 (into acc {status (into (get acc status []) [app])})))
                             {}
                             (into (get previous :healthy []) (get previous :unhealthy [])))))))
+
+(defn loop-health-check []
+  (loop []
+     (health-check)
+      (println "Waiting 10 seconds")
+      (<! (timeout 1000))
+    (recur)))
 
 (def app-sentinel (ref 0))
 (defn increment-sentinel [apps]

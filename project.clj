@@ -4,6 +4,7 @@
   :license {:name "GPL-2.0-or-later"
             :url "https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt"}
   :dependencies [[org.clojure/clojure "1.11.1"]
+                 [org.clojure/core.async "1.6.673"]
                  [compojure "1.7.0"]
                  [http-kit "2.6.0"]
                  [ring "1.10.0" :exclusions [ring/ring-core]]
