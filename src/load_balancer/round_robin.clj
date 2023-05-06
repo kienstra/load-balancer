@@ -23,7 +23,7 @@
   (let [status (:status ((app) (mock/request :get "/")))]
     (and (>= status 200) (< status 300))))
 
-(defn health-check []
+(defn check-health []
   (dosync
    (alter be-apps (fn [previous-apps]
                     (reduce (fn [acc app]
@@ -36,7 +36,7 @@
   (let [c (chan)]
     (go
       (<! (timeout interval))
-      (>! c (health-check)))
+      (>! c (check-health)))
     (prn (<!! c))
     (close! c)
     (recur interval)))
