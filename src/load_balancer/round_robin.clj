@@ -1,5 +1,5 @@
 (ns load-balancer.round-robin
-  (:require [clojure.core.async :refer [<! >! <!! chan go timeout]]
+  (:require [clojure.core.async :refer [<! >! <!! chan close! go timeout]]
             [clojure.string :refer [join]]
             [compojure.core :refer [GET]]
             [load-balancer.log :refer [log-request]]
@@ -38,6 +38,7 @@
       (<! (timeout interval))
       (>! c (health-check)))
     (prn (<!! c))
+    (close! c)
     (recur interval)))
 
 (def app-sentinel (ref 0))
