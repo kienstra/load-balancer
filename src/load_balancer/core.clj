@@ -5,7 +5,8 @@
 
 (defn -main []
   (run-server (lb-app) {:port 3000})
-  (map-indexed (fn [i server]
-                 (run-server (server) {:port (+ 8080 i)}))
-               be-apps)
+  (let [apps (:healthy (deref be-apps))]
+    (for [i (count apps)
+          :let [app (i apps)]]
+        (run-server (app) {:port (+ 8080 i)})))
   (loop-health-check))

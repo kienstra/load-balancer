@@ -1,5 +1,5 @@
 (ns load-balancer.round-robin
-  (:require [clojure.core.async :refer [<! go-loop timeout]]
+  (:require [clojure.core.async :refer [<! go timeout]]
             [clojure.string :refer [join]]
             [compojure.core :refer [GET]]
             [load-balancer.log :refer [log-request]]
@@ -17,7 +17,7 @@
 (defn get-apps [amount]
   (map get-app (range amount)))
 
-(def be-apps (ref {:healthy (get-apps 10)}))
+(def be-apps (ref {:healthy (get-apps 10) :unhealthy ()}))
 
 (defn healthy? [app]
   (let [status (:status ((app) (mock/request :get "/")))]
@@ -25,19 +25,17 @@
 
 (defn health-check []
   (dosync
-   (alter be-apps (fn [previous]
+   (alter be-apps (fn [previous-apps]
                     (reduce (fn [acc app]
                               (let [status (if (healthy? app) :healthy :unhealthy)]
                                 (into acc {status (into (get acc status []) [app])})))
                             {}
-                            (into (get previous :healthy []) (get previous :unhealthy [])))))))
+                            (into (get previous-apps :healthy []) (get previous-apps :unhealthy [])))))))
 
 (defn loop-health-check []
-  (loop []
-     (health-check)
-      (println "Waiting 10 seconds")
-      (<! (timeout 1000))
-    (recur)))
+  (go
+    (<! (timeout 10000))
+    (health-check)))
 
 (def app-sentinel (ref 0))
 (defn increment-sentinel [apps]
