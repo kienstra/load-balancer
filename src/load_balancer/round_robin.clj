@@ -32,25 +32,25 @@
                             {}
                             (into (get previous-apps :healthy []) (get previous-apps :unhealthy [])))))))
 
-(defn poll-health [interval]
+(defn update-be-apps! [apps]
+  (dosync
+   (alter apps (fn [previous-apps]
+                    (let [healthy (get previous-apps :healthy [])]
+                      (into previous-apps {:healthy (conj (rest healthy) (first healthy))}))))))
+
+(defn first-healthy-app [apps]
+  (first (:healthy (deref apps))))
+
+(defn poll-health [time]
   (let [c (chan)]
     (go
-      (<! (timeout interval))
+      (<! (timeout time))
       (>! c (check-health)))
     (prn (<!! c))
     (close! c)
-    (recur interval)))
+    (recur time)))
 
-(def app-sentinel (ref 0))
-(defn increment-sentinel [apps]
-  (dosync
-   (alter app-sentinel (fn [previous]
-                         (if
-                          (= (count apps) (inc previous))
-                           0
-                           (inc previous))))))
-
-(defn get-be-app []
-  (let [app (nth (:healthy (deref be-apps)) (deref app-sentinel))]
-    (increment-sentinel (:healthy (deref be-apps)))
+(defn get-be-app! []
+  (let [app (first-healthy-app be-apps)]
+    (update-be-apps! be-apps)
     (app)))
