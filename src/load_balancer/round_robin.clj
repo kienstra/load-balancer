@@ -1,6 +1,5 @@
 (ns load-balancer.round-robin
   (:require [clojure.core.async :refer [<! >! <!! chan close! go timeout]]
-            [clojure.string :refer [join]]
             [compojure.core :refer [GET]]
             [load-balancer.log :refer [log-request]]
             [ring.middleware.params :refer [wrap-params]]
@@ -9,7 +8,7 @@
 
 (defn get-route [server-number]
   (GET "/" request (do (log-request request)
-                       {:success 200 :body (join " " ["Hello from server" server-number])})))
+                       {:success 200 :body (str "Hello from server " server-number)})))
 
 (defn get-app [server-number]
   (fn [] (-> (get-route server-number) wrap-reload wrap-params)))
