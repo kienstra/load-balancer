@@ -34,8 +34,8 @@
 (defn update-be-apps! [apps]
   (dosync
    (alter apps (fn [previous-apps]
-                    (let [healthy (get previous-apps :healthy [])]
-                      (into previous-apps {:healthy (conj (rest healthy) (first healthy))}))))))
+                 (let [healthy (get previous-apps :healthy [])]
+                   (into previous-apps {:healthy (conj (rest healthy) (first healthy))}))))))
 
 (defn first-healthy-app [apps]
   (first (:healthy (deref apps))))

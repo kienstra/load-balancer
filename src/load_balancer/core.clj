@@ -8,5 +8,5 @@
   (let [apps (:healthy (deref be-apps))]
     (for [i (count apps)
           :let [app (i apps)]]
-        (run-server (app) {:port (+ 8080 i)})))
+      (run-server (app) {:port (+ 8080 i)})))
   (poll-health 10000))
