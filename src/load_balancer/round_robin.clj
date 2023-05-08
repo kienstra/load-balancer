@@ -21,7 +21,7 @@
 (defn set-be-ports! [apps]
   (dosync
    (alter be-apps (fn [previous-apps]
-                    (into previous-apps {:healthy apps})))))
+                    (into previous-apps {:healthy (filter healthy? apps)})))))
 
 (defn update-be-ports! [apps]
   (dosync

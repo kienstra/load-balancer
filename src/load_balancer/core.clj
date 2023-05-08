@@ -7,6 +7,6 @@
 (defn -main []
   (run-server (lb-app be-url!) {:port 80})
   (let [ports (be-ports 10)]
-    (init! ports 10000)
     (dorun (for [port ports]
-             (run-server (be-app) {:port port})))))
+             (run-server (be-app) {:port port})))
+    (init! ports 10000)))
