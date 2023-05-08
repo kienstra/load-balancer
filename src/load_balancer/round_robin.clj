@@ -1,19 +1,7 @@
 (ns load-balancer.round-robin
   (:require [clojure.core.async :refer [<! >! <!! chan close! go timeout]]
-            [compojure.core :refer [defroutes GET]]
-            [load-balancer.log :refer [log-request]]
             [org.httpkit.client :as client]
-            [ring.middleware.params :refer [wrap-params]]
-            [ring.middleware.reload :refer [wrap-reload]]
             [load-balancer.url :refer [port->url]]))
-
-(defroutes
-  be-app-routes
-  (GET "/" request (do (log-request request)
-                       (str "Hello from " (:server-port request)))))
-
-(defn be-app []
-  (-> be-app-routes wrap-reload wrap-params))
 
 (defn be-ports [amount]
   (map #(+ 8080 %) (range amount)))
@@ -55,3 +43,6 @@
   (let [app (first (healthy-apps be-apps))]
     (update-be-ports! be-apps)
     app))
+
+(defn be-url! []
+  (port->url (be-port!)))
