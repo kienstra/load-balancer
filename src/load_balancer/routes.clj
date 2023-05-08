@@ -8,11 +8,11 @@
 
 (defroutes
   lb-app-routes
-  (GET "/" request (let [response (deref (client/request (into
-                                                          (select-keys request [:method :timeout :connect-timeout :idle-timeout :query-params :as :form-params :client :body :basic-auth :user-agent])
-                                                          {:url (str "http://localhost:" (be-port!))})))]
-                     (log-request response)
-                     (:body response))))
+  (GET "/" request (do
+                     (log-request request)
+                     (:body (deref (client/request (into
+                                                    (select-keys request [:method :timeout :connect-timeout :idle-timeout :query-params :as :form-params :client :body :basic-auth :user-agent])
+                                                    {:url (str "http://localhost:" (be-port!))})))))))
 
 (defn lb-app []
   (-> lb-app-routes wrap-reload wrap-params))

@@ -2,7 +2,7 @@
 
 (defn log-request [request]
   (let [headers (:headers request)]
-    (println "Handled request" request)
+    (println "Handled request from" (get headers "host"))
     (println (:request-method request) "/" (:scheme request))
     (println "Port:" (:server-port request))
     (println "Name:" (:server-name request))
