@@ -2,9 +2,9 @@
   (:require [clojure.core.async :refer [<! >! <!! chan close! go timeout]]
             [compojure.core :refer [defroutes GET]]
             [load-balancer.log :refer [log-request]]
+            [org.httpkit.client :as client]
             [ring.middleware.params :refer [wrap-params]]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [ring.mock.request :as mock]))
+            [ring.middleware.reload :refer [wrap-reload]]))
 
 (defroutes
   be-app-routes
@@ -14,14 +14,13 @@
 (defn be-app []
   (-> be-app-routes wrap-reload wrap-params))
 
-(defn get-be-apps [amount]
-  (for [_ (range amount)]
-    be-app))
+(defn be-ports [amount]
+  (map #(+ 8080 %) (range amount)))
 
-(def be-apps (ref {:healthy (get-be-apps 10) :unhealthy []}))
+(def be-apps (ref {:healthy (be-ports 10) :unhealthy []}))
 
-(defn healthy? [app]
-  (let [status (:status ((app) (mock/request :get "/")))]
+(defn healthy? [port]
+  (let [status (:status (deref (client/get (str "http://localhost:" port))))]
     (and (>= status 200) (< status 300))))
 
 (defn check-health []
@@ -33,11 +32,11 @@
                             {}
                             (into (get previous-apps :healthy []) (get previous-apps :unhealthy [])))))))
 
-(defn update-be-apps! [apps]
+(defn update-be-ports! [apps]
   (dosync
    (alter apps (fn [previous-apps]
                  (let [healthy (get previous-apps :healthy [])]
-                   (into previous-apps {:healthy (conj (rest healthy) (first healthy))}))))))
+                   (into previous-apps {:healthy (concat (rest healthy) [(first healthy)])}))))))
 
 (defn healthy-apps [apps]
   (:healthy (deref apps)))
@@ -51,7 +50,7 @@
     (close! c)
     (recur time)))
 
-(defn get-be-app! []
+(defn be-port! []
   (let [app (first (healthy-apps be-apps))]
-    (update-be-apps! be-apps)
-    (app)))
+    (update-be-ports! be-apps)
+    app))
