@@ -37,7 +37,7 @@
     (go
       (<! (timeout time))
       (>! c (check-health)))
-    (prn (<!! c))
+    (println "Health results:" (<!! c))
     (close! c)
     (recur time)))
 
