@@ -4,7 +4,8 @@
             [load-balancer.log :refer [log-request]]
             [org.httpkit.client :as client]
             [ring.middleware.params :refer [wrap-params]]
-            [ring.middleware.reload :refer [wrap-reload]]))
+            [ring.middleware.reload :refer [wrap-reload]]
+            [load-balancer.url :refer [port->url]]))
 
 (defroutes
   be-app-routes
@@ -20,7 +21,7 @@
 (def be-apps (ref {:healthy (be-ports 10) :unhealthy []}))
 
 (defn healthy? [port]
-  (let [status (:status (deref (client/get (str "http://localhost:" port))))]
+  (let [status (:status (deref (client/get (port->url port))))]
     (and (>= status 200) (< status 300))))
 
 (defn check-health []
