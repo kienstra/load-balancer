@@ -6,7 +6,7 @@
 (def be-apps (ref {:healthy [] :unhealthy []}))
 
 (defn healthy? [port]
-  (let [status (:status (deref (client/get (port->url port) {:headers {"accept" "*/*"}})))]
+  (let [status (get (deref (client/get (port->url port) {:headers {"accept" "*/*"}})) :status nil)]
     (and (>= status 200) (< status 300))))
 
 (defn check-health []
