@@ -3,19 +3,16 @@
             [ring.middleware.reload :refer [wrap-reload]]
             [ring.middleware.params :refer [wrap-params]]
             [load-balancer.log :refer [log-request]]
-            [org.httpkit.client :as client]
-            [load-balancer.round-robin :refer [be-url!]]))
+            [org.httpkit.client :as client]))
 
-(defroutes
-  lb-app-routes
-  (GET "/" request (do
-                     (log-request request)
-                     (:body (deref (client/request (into
-                                                    (select-keys request [:method :timeout :connect-timeout :idle-timeout :query-params :as :form-params :client :body :basic-auth :user-agent])
-                                                    {:url (be-url!) :headers {"accept" (get (:headers request) "accept")}})))))))
-
-(defn lb-app []
-  (-> lb-app-routes wrap-reload wrap-params))
+(defn lb-app [url!]
+  (-> (GET "/" request (do
+                         (log-request request)
+                         (:body (deref (client/request (into
+                                                        (select-keys request [:method :timeout :connect-timeout :idle-timeout :query-params :as :form-params :client :body :basic-auth :user-agent])
+                                                        {:url (url!) :headers {"accept" (get (:headers request) "accept")}}))))))
+      wrap-reload
+      wrap-params))
 
 (defroutes
   be-app-routes

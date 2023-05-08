@@ -18,7 +18,7 @@
                             {}
                             (into (get previous-apps :healthy []) (get previous-apps :unhealthy [])))))))
 
-(defn set-be-ports [apps]
+(defn set-be-ports! [apps]
   (dosync
    (alter be-apps (fn [previous-apps]
                     (into previous-apps {:healthy apps})))))
@@ -32,7 +32,7 @@
 (defn healthy-apps [apps]
   (:healthy (deref apps)))
 
-(defn poll-health [time]
+(defn poll-health! [time]
   (let [c (chan)]
     (go
       (<! (timeout time))
@@ -48,3 +48,7 @@
 
 (defn be-url! []
   (port->url (be-port!)))
+
+(defn init! [ports polling-interval]
+  (set-be-ports! ports)
+  (poll-health! polling-interval))
