@@ -4,7 +4,7 @@
             [load-balancer.routes :refer [be-app lb-app]]))
 
 (defn -main []
-  (run-server (lb-app) {:port 3000})
+  (run-server (lb-app) {:port 80})
   (dorun (for [port (healthy-apps be-apps)]
            (run-server (be-app) {:port port})))
   (poll-health 10000))
