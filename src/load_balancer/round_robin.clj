@@ -1,12 +1,9 @@
 (ns load-balancer.round-robin
   (:require [clojure.core.async :refer [<! >! <!! chan close! go timeout]]
             [org.httpkit.client :as client]
-            [load-balancer.url :refer [port->url]]))
+            [load-balancer.port :refer [port->url]]))
 
-(defn be-ports [amount]
-  (map #(+ 8080 %) (range amount)))
-
-(def be-apps (ref {:healthy (be-ports 10) :unhealthy []}))
+(def be-apps (ref {:healthy [] :unhealthy []}))
 
 (defn healthy? [port]
   (let [status (:status (deref (client/get (port->url port) {:headers {"accept" "*/*"}})))]
@@ -20,6 +17,11 @@
                                 (into acc {status (into (get acc status []) [app])})))
                             {}
                             (into (get previous-apps :healthy []) (get previous-apps :unhealthy [])))))))
+
+(defn set-be-ports [apps]
+  (dosync
+   (alter be-apps (fn [previous-apps]
+                    (into previous-apps {:healthy apps})))))
 
 (defn update-be-ports! [apps]
   (dosync
