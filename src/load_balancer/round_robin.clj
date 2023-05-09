@@ -3,7 +3,7 @@
             [org.httpkit.client :as client]
             [load-balancer.port :refer [port->url]]))
 
-(def be-apps (ref {:healthy [] :unhealthy []}))
+(def be-ports (ref {:healthy [] :unhealthy []}))
 
 (defn healthy? [port]
   (let [status (get (deref (client/get (port->url port) {:headers {"accept" "*/*"}})) :status nil)]
@@ -11,26 +11,26 @@
 
 (defn check-health []
   (dosync
-   (alter be-apps (fn [previous-apps]
-                    (reduce (fn [acc app]
-                              (let [status (if (healthy? app) :healthy :unhealthy)]
-                                (into acc {status (into (get acc status []) [app])})))
+   (alter be-ports (fn [previous-ports]
+                    (reduce (fn [acc port]
+                              (let [status (if (healthy? port) :healthy :unhealthy)]
+                                (into acc {status (into (get acc status []) [port])})))
                             {}
-                            (into (get previous-apps :healthy []) (get previous-apps :unhealthy [])))))))
+                            (into (get previous-ports :healthy []) (get previous-ports :unhealthy [])))))))
 
-(defn set-be-ports! [apps]
+(defn set-be-ports! [ports]
   (dosync
-   (alter be-apps (fn [previous-apps]
-                    (into previous-apps {:healthy (filter healthy? apps)})))))
+   (alter be-ports (fn [previous-ports]
+                    (into previous-ports {:healthy (filter healthy? ports)})))))
 
-(defn update-be-ports! [apps]
+(defn update-be-ports! [ports]
   (dosync
-   (alter apps (fn [previous-apps]
-                 (let [healthy (get previous-apps :healthy [])]
-                   (into previous-apps {:healthy (concat (rest healthy) [(first healthy)])}))))))
+   (alter ports (fn [previous-ports]
+                 (let [healthy (get previous-ports :healthy [])]
+                   (into previous-ports {:healthy (concat (rest healthy) [(first healthy)])}))))))
 
-(defn healthy-apps [apps]
-  (:healthy (deref apps)))
+(defn healthy-ports [ports]
+  (:healthy (deref ports)))
 
 (defn poll-health! [time]
   (let [c (chan)]
@@ -42,9 +42,9 @@
     (recur time)))
 
 (defn be-port! []
-  (let [app (first (healthy-apps be-apps))]
-    (update-be-ports! be-apps)
-    app))
+  (let [port (first (healthy-ports be-ports))]
+    (update-be-ports! be-ports)
+    port))
 
 (defn be-url! []
   (port->url (be-port!)))
