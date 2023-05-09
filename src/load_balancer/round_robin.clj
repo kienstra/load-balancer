@@ -12,22 +12,22 @@
 (defn check-health []
   (dosync
    (alter be-ports (fn [previous-ports]
-                    (reduce (fn [acc port]
-                              (let [status (if (healthy? port) :healthy :unhealthy)]
-                                (into acc {status (into (get acc status []) [port])})))
-                            {}
-                            (into (get previous-ports :healthy []) (get previous-ports :unhealthy [])))))))
+                     (reduce (fn [acc port]
+                               (let [status (if (healthy? port) :healthy :unhealthy)]
+                                 (into acc {status (into (get acc status []) [port])})))
+                             {}
+                             (into (get previous-ports :healthy []) (get previous-ports :unhealthy [])))))))
 
 (defn set-be-ports! [ports]
   (dosync
    (alter be-ports (fn [previous-ports]
-                    (into previous-ports {:healthy (filter healthy? ports)})))))
+                     (into previous-ports {:healthy (filter healthy? ports)})))))
 
 (defn update-be-ports! [ports]
   (dosync
    (alter ports (fn [previous-ports]
-                 (let [healthy (get previous-ports :healthy [])]
-                   (into previous-ports {:healthy (concat (rest healthy) [(first healthy)])}))))))
+                  (let [healthy (get previous-ports :healthy [])]
+                    (into previous-ports {:healthy (concat (rest healthy) [(first healthy)])}))))))
 
 (defn healthy-ports [ports]
   (:healthy (deref ports)))
