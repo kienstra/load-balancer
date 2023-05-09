@@ -5,5 +5,5 @@
 
 (deftest test-app
   (testing "load balancing server"
-    (let [response ((lb-app) (mock/request :get "/"))]
+    (let [response ((lb-app (fn [] "http://localhost:8080")) (mock/request :get "/"))]
       (is (= (:status response) 200)))))
