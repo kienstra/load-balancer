@@ -7,7 +7,7 @@
 
 (defn healthy? [port]
   (let [status (get (deref (client/get (port->url port) {:headers {"accept" "*/*"}})) :status nil)]
-    (< 199 status 300)))
+    (< 199 status 400)))
 
 (defn check-health []
   (dosync
