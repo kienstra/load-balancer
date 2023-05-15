@@ -31,3 +31,10 @@
 
 (defn be-app []
   (-> be-app-routes wrap-reload wrap-params))
+
+(defn health-check-app [check-health]
+  (->
+   (GET "/" request (do (log-request request)
+                        (str "Health check results: " (check-health))))
+   wrap-reload
+   wrap-params))

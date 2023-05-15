@@ -16,7 +16,8 @@
                                (let [status (if (healthy? port) :healthy :unhealthy)]
                                  (into acc {status (into (get acc status []) [port])})))
                              {}
-                             (into (get previous-ports :healthy []) (get previous-ports :unhealthy [])))))))
+                             (into (get previous-ports :healthy []) (get previous-ports :unhealthy [])))))
+   (deref be-ports)))
 
 (defn set-be-ports! [ports]
   (dosync

@@ -1,14 +1,19 @@
 (ns load-balancer.core
   (:require [org.httpkit.server :refer [run-server]]
             [clojure.tools.cli :refer [parse-opts]]
-            [load-balancer.round-robin :refer [init!]]
-            [load-balancer.routes :refer [be-app lb-app]]
+            [load-balancer.round-robin :refer [check-health init!]]
+            [load-balancer.routes :refer [be-app health-check-app lb-app]]
             [load-balancer.port :refer [be-ports]]))
 
 (def cli-options
   [["-p" "--port PORT" "Port number"
     :default 80
     :id :port
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 50000) "The port should be between 0 and 50000"]]
+   ["-h" "--health HEALTH" "Health check port number"
+    :default 4000
+    :id :health-check-port
     :parse-fn #(Integer/parseInt %)
     :validate [#(< 0 % 50000) "The port should be between 0 and 50000"]]
    ["-i" "--interval INTERVAL" "Polling interval"
@@ -22,4 +27,5 @@
         ports (be-ports 10)]
     (dorun (for [port ports]
              (run-server (be-app) {:port port})))
-    (run-server (lb-app (init! ports (:polling-interval options))) {:port (:port options)})))
+    (run-server (lb-app (init! ports (:polling-interval options))) {:port (:port options)})
+    (run-server (health-check-app check-health) {:port (:health-check-port options)})))
