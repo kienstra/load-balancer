@@ -51,5 +51,4 @@
 
 (defn init! [ports polling-interval]
   (set-be-ports! ports)
-  (poll-health! polling-interval)
-  be-url!)
+  (poll-health! polling-interval))
