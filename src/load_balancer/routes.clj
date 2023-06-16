@@ -27,7 +27,14 @@
 (defroutes
   be-app-routes
   (GET "/" request (do (log-request request)
-                       (str "Hello from " (:server-port request)))))
+                       (str "Hello from the web server running at " (:server-port request)))))
 
 (defn be-app []
   (-> be-app-routes wrap-reload wrap-params))
+
+(defn health-check-app [check-health]
+  (->
+   (GET "/" request (do (log-request request)
+                        (str "Health check results: " (check-health))))
+   wrap-reload
+   wrap-params))

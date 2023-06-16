@@ -7,7 +7,7 @@
 
 (defn healthy? [port]
   (let [status (get (deref (client/get (port->url port) {:headers {"accept" "*/*"}})) :status nil)]
-    (and (>= status 200) (< status 300))))
+    (= 200 status)))
 
 (defn check-health []
   (dosync
@@ -16,7 +16,8 @@
                                (let [status (if (healthy? port) :healthy :unhealthy)]
                                  (into acc {status (into (get acc status []) [port])})))
                              {}
-                             (into (get previous-ports :healthy []) (get previous-ports :unhealthy [])))))))
+                             (into (get previous-ports :healthy []) (get previous-ports :unhealthy [])))))
+   (deref be-ports)))
 
 (defn set-be-ports! [ports]
   (dosync
@@ -50,5 +51,7 @@
   (port->url (be-port!)))
 
 (defn init! [ports polling-interval]
-  (set-be-ports! ports)
-  (poll-health! polling-interval))
+  (go
+    (set-be-ports! ports)
+    (poll-health! polling-interval))
+  be-url!)
